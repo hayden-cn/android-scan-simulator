@@ -14,8 +14,8 @@ pub struct AppConfig {
 impl Default for AppConfig {
     fn default() -> Self {
         Self {
-            action: "android.intent.action.SCAN_RESULT".to_string(),
-            broadcast_key: "SCAN_BARCODE".to_string(),
+            action: "android.intent.ACTION_DECODE_DATA".to_string(),
+            broadcast_key: "barcode_string".to_string(),
             last_device: String::new(),
         }
     }
