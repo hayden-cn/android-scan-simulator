@@ -2,6 +2,7 @@ use eframe::egui;
 use std::sync::mpsc;
 use crate::adb;
 use crate::config::AppConfig;
+use crate::decode;
 
 enum BroadcastResult {
     Ok(String),
@@ -59,6 +60,33 @@ impl eframe::App for ScanApp {
                 self.receiver = None;
             } else {
                 ctx.request_repaint();
+            }
+        }
+
+        let ctrl_v = ctx.input(|i| i.key_pressed(egui::Key::V) && i.modifiers.ctrl);
+        if ctrl_v && self.receiver.is_none() {
+            if let Ok(mut clipboard) = arboard::Clipboard::new() {
+                if let Ok(img) = clipboard.get_image() {
+                    let rgba = image::RgbaImage::from_raw(
+                        img.width as u32,
+                        img.height as u32,
+                        img.bytes.to_vec(),
+                    );
+                    if let Some(rgba_img) = rgba {
+                        let raw = rgba_img.to_vec();
+                        match decode::decode_image_bytes(&raw) {
+                            Ok(text) => {
+                                self.barcode = text;
+                                self.status = "Scanned from clipboard".to_string();
+                            }
+                            Err(e) => {
+                                self.status = e;
+                            }
+                        }
+                    } else {
+                        self.status = "Failed to construct image from clipboard".to_string();
+                    }
+                }
             }
         }
 
@@ -198,6 +226,22 @@ impl eframe::App for ScanApp {
                 let response = ui.text_edit_singleline(&mut self.barcode);
                 if response.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
                     self.send_scan();
+                }
+                if ui.button("Scan Image").clicked() {
+                    if let Some(path) = rfd::FileDialog::new()
+                        .add_filter("Images", &["png", "jpg", "jpeg", "bmp", "gif", "webp"])
+                        .pick_file()
+                    {
+                        match decode::decode_image_file(&path) {
+                            Ok(text) => {
+                                self.barcode = text;
+                                self.status = format!("Scanned: {}", path.file_name().unwrap_or_default().to_string_lossy());
+                            }
+                            Err(e) => {
+                                self.status = e;
+                            }
+                        }
+                    }
                 }
             });
 

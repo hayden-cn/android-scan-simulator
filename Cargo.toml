@@ -7,3 +7,10 @@ edition = "2024"
 eframe = "0.32"
 serde = { version = "1", features = ["derive"] }
 toml = "0.8"
+zxing-cpp = { version = "0.5", features = ["bundled", "image"] }
+rfd = "0.15"
+arboard = { version = "3", features = ["image-data"] }
+image = "0.25"
+
+[profile.dev.package.zxing-cpp]
+opt-level = 2

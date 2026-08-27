@@ -3,6 +3,7 @@
 mod adb;
 mod app;
 mod config;
+mod decode;
 
 fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
