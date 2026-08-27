@@ -13,7 +13,7 @@ pub struct ScanApp {
     config: AppConfig,
     devices: Vec<String>,
     selected_device: usize,
-    barcode: String,
+    content: String,
     status: String,
     receiver: Option<mpsc::Receiver<BroadcastResult>>,
     selected_profile: usize,
@@ -35,7 +35,7 @@ impl Default for ScanApp {
             config,
             devices,
             selected_device,
-            barcode: String::new(),
+            content: String::new(),
             status: String::new(),
             receiver: None,
             selected_profile,
@@ -76,7 +76,7 @@ impl eframe::App for ScanApp {
                         let raw = rgba_img.to_vec();
                         match decode::decode_image_bytes(&raw) {
                             Ok(text) => {
-                                self.barcode = text;
+                                self.content = text;
                                 self.status = "Scanned from clipboard".to_string();
                             }
                             Err(e) => {
@@ -222,8 +222,8 @@ impl eframe::App for ScanApp {
             ui.add_space(8.0);
 
             ui.horizontal(|ui| {
-                ui.label("Barcode:");
-                let response = ui.text_edit_singleline(&mut self.barcode);
+                ui.label("Content:");
+                let response = ui.text_edit_singleline(&mut self.content);
                 if response.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
                     self.send_scan();
                 }
@@ -234,7 +234,7 @@ impl eframe::App for ScanApp {
                     {
                         match decode::decode_image_file(&path) {
                             Ok(text) => {
-                                self.barcode = text;
+                                self.content = text;
                                 self.status = format!("Scanned: {}", path.file_name().unwrap_or_default().to_string_lossy());
                             }
                             Err(e) => {
@@ -269,7 +269,7 @@ impl ScanApp {
         let device = self.devices[self.selected_device].clone();
         let action = self.config.action.clone();
         let key = self.config.broadcast_key.clone();
-        let value = self.barcode.clone();
+        let value = self.content.clone();
 
         self.config.last_device = device.clone();
         let _ = self.config.save();
