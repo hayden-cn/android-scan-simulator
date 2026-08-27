@@ -1,7 +1,20 @@
 use std::process::Command;
 
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
+
+#[cfg(target_os = "windows")]
+const CREATE_NO_WINDOW: u32 = 0x08000000;
+
+fn adb_command() -> Command {
+    let mut cmd = Command::new("adb");
+    #[cfg(target_os = "windows")]
+    cmd.creation_flags(CREATE_NO_WINDOW);
+    cmd
+}
+
 pub fn list_devices() -> Vec<String> {
-    let output = match Command::new("adb").arg("devices").output() {
+    let output = match adb_command().arg("devices").output() {
         Ok(o) => o,
         Err(_) => return Vec::new(),
     };
@@ -23,7 +36,7 @@ pub fn list_devices() -> Vec<String> {
 }
 
 pub fn send_broadcast(device: &str, action: &str, key: &str, value: &str) -> Result<String, String> {
-    let output = Command::new("adb")
+    let output = adb_command()
         .args([
             "-s", device,
             "shell", "am", "broadcast",
