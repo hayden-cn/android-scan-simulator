@@ -21,7 +21,7 @@ Single-crate, four modules:
 - `src/main.rs` — entry point, configures eframe window (420×340)
 - `src/app.rs` — egui UI: device selector, action/key/barcode inputs, send button, status display
 - `src/adb.rs` — `list_devices()` parses `adb devices`; `send_broadcast()` runs `adb -s <device> shell am broadcast -a <action> --es <key> <value>`
-- `src/config.rs` — TOML config persistence at binary's sibling `config.toml`; defaults: `action = "android.intent.action.SCAN_RESULT"`, `key = "SCAN_BARCODE"`
+- `src/config.rs` — TOML config persistence at binary's sibling, named after the binary (`<binary-stem>.toml`, e.g. `android-scan-simulator.toml`); defaults: `action = "android.intent.action.SCAN_RESULT"`, `key = "SCAN_BARCODE"`
 
 ## Dependencies
 

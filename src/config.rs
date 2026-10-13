@@ -2,7 +2,18 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 
-const CONFIG_FILE: &str = "config.toml";
+const CONFIG_EXT: &str = "toml";
+const DEFAULT_CONFIG_STEM: &str = "config";
+
+/// 配置文件名与二进制同名，例如 `android-scan-simulator.exe` -> `android-scan-simulator.toml`
+fn config_file_name() -> String {
+    let stem = std::env::current_exe()
+        .ok()
+        .and_then(|p| p.file_stem().map(|s| s.to_string_lossy().into_owned()))
+        .filter(|s| !s.is_empty())
+        .unwrap_or_else(|| DEFAULT_CONFIG_STEM.to_string());
+    format!("{stem}.{CONFIG_EXT}")
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Profile {
@@ -53,7 +64,7 @@ impl AppConfig {
     pub fn config_path() -> Option<PathBuf> {
         std::env::current_exe()
             .ok()
-            .and_then(|p| p.parent().map(|d| d.join(CONFIG_FILE)))
+            .and_then(|p| p.parent().map(|d| d.join(config_file_name())))
     }
 
     pub fn load() -> Self {
